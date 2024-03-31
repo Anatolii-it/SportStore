@@ -75,3 +75,11 @@ CREATE TABLE PurchaseHistory (
     FOREIGN KEY (EmployeeId) REFERENCES Employees(EmployeeId)
 );
 GO
+
+--склад
+CREATE TABLE Warehouse (
+    WarehouseId INT PRIMARY KEY IDENTITY,
+	ProductId INT NOT NULL,
+    Quantity INT NOT NULL,
+	FOREIGN KEY (ProductId) REFERENCES Products(ProductId)
+);
