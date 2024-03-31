@@ -1,7 +1,7 @@
 
 USE SportStore;
 GO
-
+--1
 CREATE TRIGGER UpdateProductQuantity
 ON Products
 INSTEAD OF INSERT
@@ -30,7 +30,7 @@ VALUES
     ('Running Shoes', 'Footwear', 50, 99.99, 'Nike', 79.99),
     ('Basketball_red', 'Sports Equipment', 30, 19.99, 'Spalding', 29.99);
 
-
+--2
 CREATE TRIGGER ArchiveEmployee
 ON Employees
 AFTER DELETE
@@ -41,6 +41,123 @@ BEGIN
     FROM deleted;
 END;
 
+
+
+--3
+CREATE TRIGGER PreventNewSeller
+ON Employees
+AFTER INSERT
+AS
+BEGIN
+    DECLARE @EmployeeCount INT;
+    SELECT @EmployeeCount = COUNT(*) FROM Employees;
+
+    IF @EmployeeCount > 6
+    BEGIN
+        RAISERROR ('Неможливо додати нового продавця. Кількість продавців перевищує 6.', 16, 1);
+        ROLLBACK TRANSACTION;
+    END
+END;
+
+--перевірка
+INSERT INTO Employees (FullName, Position, HireDate, Salary)
+VALUES
+    ('Bob Miler', 'Manager', '2023-01-01', 6000);
+
+
+--4
+CREATE TRIGGER CheckDuplicateCustomers
+ON Customers
+AFTER INSERT
+AS
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM inserted i
+        JOIN Customers c ON i.FullName = c.FullName
+        WHERE i.CustomerId <> c.CustomerId
+    )
+    BEGIN
+        INSERT INTO DuplicateCustomersLog (FullName, DuplicateDateTime)
+        SELECT FullName, GETDATE()
+        FROM inserted;
+    END
+END;
+--такой таблици нет(структура єтого магазина отстой я 5 лет работал в 1с поддержки худших вопросов невидел)
+INSERT INTO Customers (FullName, Email, Phone, Gender, OrderHistory, DiscountPercent, SubscribedToNewsletter)
+VALUES
+    ('John Doe', 'john@example.com', '1234567890', 'Male', NULL, 0.00, 1);
+
+
+--5
+CREATE TRIGGER MoveOrderHistoryOnDelete
+ON Customers
+AFTER DELETE
+AS
+BEGIN
+    INSERT INTO PurchaseHistory (CustomerId, PurchaseDate, PurchaseDetails)
+    SELECT d.CustomerId, GETDATE(), d.OrderHistory
+    FROM deleted d;
+END;
+
+--6
+CREATE TRIGGER PreventAddingExistingSeller
+ON Employees
+INSTEAD OF INSERT
+AS
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM inserted i
+        JOIN Customers c ON i.FullName = c.FullName
+        WHERE i.Position = 'Salesperson'
+    )
+    BEGIN
+        RAISERROR('Запис існує. Додавання нового продавця скасовується.', 16, 1);
+        ROLLBACK TRANSACTION;
+    END
+    ELSE
+    BEGIN
+        INSERT INTO Employees (FullName, Position, HireDate, Salary)
+        SELECT FullName, Position, HireDate, Salary
+        FROM inserted;
+    END;
+END;
+
+INSERT INTO Employees (FullName, Position, HireDate, Salary)
+VALUES
+('Amanda Martinez', 'Manager', '2020-01-01', 5000);
+
+
+--7
+CREATE TRIGGER PreventAddingExistingCustomer
+ON Customers
+INSTEAD OF INSERT
+AS
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM inserted i
+        JOIN Employees e ON i.FullName = e.FullName
+        WHERE e.Position = 'Salesperson'
+    )
+    BEGIN
+        RAISERROR('Cannot add new customer. This person already exists in the Employees table as a salesperson.', 16, 1);
+    END
+    ELSE
+    BEGIN
+        INSERT INTO Customers (FullName, Email, Phone, Gender, OrderHistory, DiscountPercent, SubscribedToNewsletter)
+        SELECT FullName, Email, Phone, Gender, OrderHistory, DiscountPercent, SubscribedToNewsletter
+        FROM inserted;
+    END;
+END;
+--перевірка
+INSERT INTO Customers (FullName, Email, Phone, Gender, OrderHistory, DiscountPercent, SubscribedToNewsletter)
+VALUES
+    ('John Doe', 'john@example.com', '1234567890', 'Male', NULL, 0.00, 1);
+
+
+--8
 CREATE TRIGGER PreventProducts
 ON Sales
 INSTEAD OF INSERT
@@ -68,9 +185,9 @@ INSERT INTO Sales (ProductId, SalePrice, Quantity, SaleDate, CustomerId, Employe
 VALUES
     (23,  99.99, 10, '2024-03-31', 4,3);
 
-	--При продажу товару заносити інформацію про продаж у
-	--таблицю «Історія». Таблиця «Історія» використовується
-	--для дубляжу інформації про всі продажі;
+
+
+	--При продажу товару заносити інформацію про продаж у таблицю «Історія».
 CREATE TRIGGER History
 ON Sales
 AFTER INSERT
@@ -87,27 +204,5 @@ BEGIN
     FROM inserted;
 END;
 
---друге питання якесь захмарне як на мене то потрбно закупити товар а для цього запит на склад до менеджера
-CREATE TRIGGER MoveToWarehouse
-ON Sales
-AFTER INSERT
-AS
-BEGIN
-    DECLARE @ProductId INT;
-    DECLARE @RemainingQuantity INT;
 
-    -- Отримуємо ідентифікатор товару та залишкову кількість після продажу з вставлених даних
-    SELECT @ProductId = ProductId, @RemainingQuantity = SUM(Quantity)
-    FROM inserted
-    GROUP BY ProductId;
-    IF @RemainingQuantity <= 5
-    BEGIN
-        INSERT INTO Warehouse (ProductId, Quantity)
-        VALUES (@ProductId, @RemainingQuantity);
-    END;
-END;
-
-UPDATE Products 
-SET Quantity = Quantity - 8 
-WHERE ProductId = 18;
 
