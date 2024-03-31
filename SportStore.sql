@@ -68,7 +68,9 @@ INSERT INTO Sales (ProductId, SalePrice, Quantity, SaleDate, CustomerId, Employe
 VALUES
     (23,  99.99, 10, '2024-03-31', 4,3);
 
-
+	--При продажу товару заносити інформацію про продаж у
+	--таблицю «Історія». Таблиця «Історія» використовується
+	--для дубляжу інформації про всі продажі;
 CREATE TRIGGER History
 ON Sales
 AFTER INSERT
@@ -84,3 +86,24 @@ BEGIN
         EmployeeId
     FROM inserted;
 END;
+
+--друге питання якесь захмарне як на мене то потрбно закупити товар а для цього запит на склад до менеджера
+CREATE TRIGGER MoveToWarehouse
+ON Sales
+AFTER INSERT
+AS
+BEGIN
+    DECLARE @ProductId INT;
+    DECLARE @RemainingQuantity INT;
+
+    -- Отримуємо ідентифікатор товару та залишкову кількість після продажу з вставлених даних
+    SELECT @ProductId = ProductId, @RemainingQuantity = SUM(Quantity)
+    FROM inserted
+    GROUP BY ProductId;
+    IF @RemainingQuantity <= 5
+    BEGIN
+        INSERT INTO Warehouse (ProductId, Quantity)
+        VALUES (@ProductId, @RemainingQuantity);
+    END;
+END;
+
