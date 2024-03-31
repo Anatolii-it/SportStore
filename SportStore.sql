@@ -43,3 +43,19 @@ VALUES
     ('Jessica Taylor', 'jessica@example.com', '7778889990', 'Female', NULL, 0.00, 1),
     ('William Wilson', 'william@example.com', '2223334445', 'Male', NULL, 0.00, 1),
     ('Amanda Martinez', 'amanda@example.com', '6667778881', 'Female', NULL, 0.00, 1);
+
+	--генератор случайних покупок
+	INSERT INTO Sales (ProductId, SalePrice, Quantity, SaleDate, CustomerId, EmployeeId)
+SELECT TOP 10
+    p.ProductId,
+    p.SalePrice,
+    1 AS Quantity,
+    GETDATE() AS SaleDate,
+    c.CustomerId,
+    e.EmployeeId
+FROM
+    Products p
+    CROSS JOIN Customers c
+    CROSS JOIN Employees e
+ORDER BY
+    NEWID();
