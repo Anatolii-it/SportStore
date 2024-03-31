@@ -25,6 +25,16 @@ CREATE TABLE Employees (
 );
 GO
 
+CREATE TABLE ArchivedEmployees (
+    EmployeeId INT PRIMARY KEY IDENTITY,
+    FullName NVARCHAR(100) NOT NULL,
+    Position NVARCHAR(50) NOT NULL,
+    HireDate DATE NOT NULL,
+    Salary MONEY NOT NULL,
+	TerminationDate DATE NOT NULL,
+);
+GO
+
 CREATE TABLE Customers (
     CustomerId INT PRIMARY KEY IDENTITY,
     FullName NVARCHAR(100) NOT NULL,
