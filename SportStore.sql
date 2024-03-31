@@ -61,13 +61,17 @@ CREATE TABLE Sales (
 );
 GO
 
+-- історія покупок
 CREATE TABLE PurchaseHistory (
     PurchaseId INT PRIMARY KEY IDENTITY,
     ProductId INT NOT NULL,
     SalePrice MONEY NOT NULL,
     Quantity INT NOT NULL,
     PurchaseDate DATE NOT NULL,
-    CustomerName NVARCHAR(100) NOT NULL,
-    FOREIGN KEY (ProductId) REFERENCES Products(ProductId)
+	CustomerId INT NOT NULL,
+	EmployeeId INT NOT NULL,
+    FOREIGN KEY (ProductId) REFERENCES Products(ProductId),
+	FOREIGN KEY (CustomerId) REFERENCES Customers(CustomerId),
+    FOREIGN KEY (EmployeeId) REFERENCES Employees(EmployeeId)
 );
 GO
