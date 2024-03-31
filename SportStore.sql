@@ -67,3 +67,20 @@ END;
 INSERT INTO Sales (ProductId, SalePrice, Quantity, SaleDate, CustomerId, EmployeeId)
 VALUES
     (23,  99.99, 10, '2024-03-31', 4,3);
+
+
+CREATE TRIGGER History
+ON Sales
+AFTER INSERT
+AS
+BEGIN
+    INSERT INTO PurchaseHistory (ProductId, SalePrice, Quantity, PurchaseDate, CustomerId, EmployeeId)
+    SELECT 
+        ProductId,
+        SalePrice,
+        Quantity,
+        SaleDate,
+        CustomerId,
+        EmployeeId
+    FROM inserted;
+END;
