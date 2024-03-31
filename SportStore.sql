@@ -15,17 +15,6 @@ CREATE TABLE Products (
 );
 GO
 
-CREATE TABLE Sales (
-    SaleId INT PRIMARY KEY IDENTITY,
-    ProductId INT NOT NULL,
-    SalePrice MONEY NOT NULL,
-    Quantity INT NOT NULL,
-    SaleDate DATE NOT NULL,
-    SellerName NVARCHAR(100) NOT NULL,
-    CustomerName NVARCHAR(100),
-    FOREIGN KEY (ProductId) REFERENCES Products(ProductId)
-);
-GO
 
 CREATE TABLE Employees (
     EmployeeId INT PRIMARY KEY IDENTITY,
@@ -45,6 +34,20 @@ CREATE TABLE Customers (
     OrderHistory NVARCHAR(MAX),
     DiscountPercent DECIMAL(5, 2),
     SubscribedToNewsletter BIT
+);
+GO
+
+CREATE TABLE Sales (
+    SaleId INT PRIMARY KEY IDENTITY,
+    ProductId INT NOT NULL,
+    SalePrice MONEY NOT NULL,
+    Quantity INT NOT NULL,
+    SaleDate DATE NOT NULL,
+	CustomerId INT NOT NULL,
+	EmployeeId INT NOT NULL,
+    FOREIGN KEY (ProductId) REFERENCES Products(ProductId),
+    FOREIGN KEY (CustomerId) REFERENCES Customers(CustomerId),
+    FOREIGN KEY (EmployeeId) REFERENCES Employees(EmployeeId)
 );
 GO
 
