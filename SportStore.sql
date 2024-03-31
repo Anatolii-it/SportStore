@@ -107,3 +107,7 @@ BEGIN
     END;
 END;
 
+UPDATE Products 
+SET Quantity = Quantity - 8 
+WHERE ProductId = 18;
+
