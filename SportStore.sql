@@ -4,7 +4,8 @@ VALUES
     ('Emily Johnson', 'Sales Representative', '2021-03-15', 4000),
     ('Michael Williams', 'Sales Representative', '2021-05-20', 4000),
     ('Jessica Brown', 'Cashier', '2021-06-10', 3500),
-    ('Daniel Jones', 'Stock Clerk', '2021-07-05', 3000);
+    ('Daniel Jones', 'Stock Clerk', '2021-07-05', 3000),
+	('Sarah Lee', 'Sales', '2021-02-02', 3000);
 GO
 
 --(Найменування, Категорія, кількість, Ціна, Виробник, ціна зі скидкою)
