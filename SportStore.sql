@@ -31,18 +31,18 @@ VALUES
     ('Volleyball', 'Sports Equipment', 20, 30.99, 'Mikasa', 27.99),
     ('Weight Bench', 'Fitness Equipment', 15, 240.99, 'Marcy', 229.99);
 
-	INSERT INTO Customers (FullName, Email, Phone, Gender, OrderHistory, DiscountPercent, SubscribedToNewsletter)
+	INSERT INTO Customers (FullName, Email, Phone, Gender, RegistrationDate, DiscountPercent, SubscribedToNewsletter)
 VALUES
-    ('John Doe', 'john@example.com', '1234567890', 'Male', NULL, 0.00, 1),
-    ('Jane Smith', 'jane@example.com', '9876543210', 'Female', NULL, 0.00, 1),
-    ('Michael Johnson', 'michael@example.com', '5551234567', 'Male', NULL, 0.00, 1),
-    ('Emily Williams', 'emily@example.com', '5559876543', 'Female', NULL, 0.00, 1),
-    ('James Brown', 'james@example.com', '9998887776', 'Male', NULL, 0.00, 1),
-    ('Sarah Lee', 'sarah@example.com', '1112223334', 'Female', NULL, 0.00, 1),
-    ('Robert Miller', 'robert@example.com', '4445556667', 'Male', NULL, 0.00, 1),
-    ('Jessica Taylor', 'jessica@example.com', '7778889990', 'Female', NULL, 0.00, 1),
-    ('William Wilson', 'william@example.com', '2223334445', 'Male', NULL, 0.00, 1),
-    ('Amanda Martinez', 'amanda@example.com', '6667778881', 'Female', NULL, 0.00, 1);
+    ('John Doe', 'john@example.com', '1234567890', 'Male', '2020-02-05', 0.00, 1),
+    ('Jane Smith', 'jane@example.com', '9876543210', 'Female', '2021-07-05', 0.00, 1),
+    ('Michael Johnson', 'michael@example.com', '5551234567', 'Male', '2019-07-15', 0.00, 1),
+    ('Emily Williams', 'emily@example.com', '5559876543', 'Female', '2020-01-05', 0.00, 1),
+    ('James Brown', 'james@example.com', '9998887776', 'Male', '2011-02-25', 0.00, 1),
+    ('Sarah Lee', 'sarah@example.com', '1112223334', 'Female', '2023-11-08', 0.00, 1),
+    ('Robert Miller', 'robert@example.com', '4445556667', 'Male', '2020-12-15', 0.00, 1),
+    ('Jessica Taylor', 'jessica@example.com', '7778889990', 'Female', '2019-03-03', 0.00, 1),
+    ('William Wilson', 'william@example.com', '2223334445', 'Male', '2021-01-12', 0.00, 1),
+    ('Amanda Martinez', 'amanda@example.com', '6667778881', 'Female', '2020-04-02', 0.00, 1);
 
 	--генератор случайних покупок
 	INSERT INTO Sales (ProductId, SalePrice, Quantity, SaleDate, CustomerId, EmployeeId)
