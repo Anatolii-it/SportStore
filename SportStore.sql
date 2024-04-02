@@ -64,14 +64,14 @@ BEGIN
     DECLARE @EmployeeCount INT;
     SELECT @EmployeeCount = COUNT(*) FROM Employees;
 
-    IF @EmployeeCount > 6
+    IF @EmployeeCount > 5
     BEGIN
-        RAISERROR ('Неможливо додати нового продавця. Кількість продавців перевищує 6.', 16, 1);
+        RAISERROR ('Неможливо додати нового продавця. Кількість продавців перевищує 5.', 16, 1);
         ROLLBACK TRANSACTION;
     END
 END;
 
---перевірка (працює)
+--перевірка (працює) запустити 2 рази
 INSERT INTO Employees (FullName, Position, HireDate, Salary)
 VALUES
     ('Bob Miler', 'Manager', '2023-01-01', 6000);
@@ -212,7 +212,7 @@ END;
 --приклад заборони (працює)
 INSERT INTO Sales (ProductId, SalePrice, Quantity, SaleDate, CustomerId, EmployeeId)
 VALUES
-    (22,  99.99, 10, '2024-03-31', 4,3);
+    (21,  99.99, 10, '2024-03-31', 4,3);
 
 
 
