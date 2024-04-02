@@ -41,7 +41,7 @@ CREATE TABLE Customers (
     Email NVARCHAR(100),
     Phone NVARCHAR(20),
     Gender NVARCHAR(10) NOT NULL, 
-    OrderHistory NVARCHAR(MAX),
+    RegistrationDate DATE NOT NULL,
     DiscountPercent DECIMAL(5, 2),
     SubscribedToNewsletter BIT
 );
