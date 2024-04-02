@@ -289,9 +289,55 @@ END;
 exec TopSalesperson
 
 -- 5
+CREATE PROCEDURE CheckManufacturer
+    @Manufacturer NVARCHAR(100)
+AS
+BEGIN
+    DECLARE @Availability NVARCHAR(3);
+
+    IF EXISTS (
+        SELECT 1
+        FROM Products
+        WHERE Manufacturer = @Manufacturer
+    )
+        SET @Availability = 'yes';
+    ELSE
+        SET @Availability = 'no';
+
+    SELECT @Availability AS Availability;
+END;
+
+-- перевірка
+exec CheckManufacturer 'Adidas';
+
+-- 6
+CREATE PROCEDURE TopManufacturer
+AS
+BEGIN
+    SELECT TOP 1
+        Products.Manufacturer AS TopManufacturer,
+        SUM(Sales.SalePrice) AS TotalSales
+    FROM Sales
+    INNER JOIN Products ON Sales.ProductId = Products.ProductId
+    GROUP BY Products.Manufacturer
+    ORDER BY TotalSales DESC;
+END;
+
+--перевірка
+exec TopManufacturer
 
 
 
+-- 7 RegistrationDate немає в базі тому за номером телефона
+CREATE PROCEDURE DeleteCustomersRegisteredAfterDate
+    @RegistrationDate DATE
+AS
+BEGIN
+    DECLARE @DeletedCount INT;
 
-
+    DELETE FROM Customers
+    WHERE RegistrationDate > @RegistrationDate;
+    SET @DeletedCount = @@ROWCOUNT;
+    SELECT @DeletedCount AS DeletedCount;
+END;
 
