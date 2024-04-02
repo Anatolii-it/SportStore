@@ -49,15 +49,15 @@ VALUES
 	--генератор случайних покупок
 	INSERT INTO Sales (ProductId, SalePrice, Quantity, SaleDate, CustomerId, EmployeeId)
 SELECT TOP 10
-    p.ProductId,
-    p.SalePrice,
+    Products.ProductId,
+    Products.SalePrice,
     1 AS Quantity,
     GETDATE() AS SaleDate,
-    c.CustomerId,
-    e.EmployeeId
+    Customers.CustomerId,
+    Employees.EmployeeId
 FROM
-    Products p
-    CROSS JOIN Customers c
-    CROSS JOIN Employees e
+    Products
+    CROSS JOIN Customers
+    CROSS JOIN Employees
 ORDER BY
     NEWID();
