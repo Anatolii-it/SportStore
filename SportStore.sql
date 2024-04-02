@@ -1,6 +1,7 @@
 
 USE SportStore;
 GO
+
 --1
 CREATE TRIGGER UpdateProductQuantity
 ON Products
@@ -24,24 +25,35 @@ BEGIN
     );
 END;
 
---Приклад 1 позіція є, зміюється лише кількість. 2 позіції немає
+--Приклад 1 позіція є, зміюється лише кількість. 2 позіції немає (працює)
 INSERT INTO Products (Name, Category, Quantity, Cost, Manufacturer, SalePrice)
 VALUES
     ('Running Shoes', 'Footwear', 50, 99.99, 'Nike', 79.99),
     ('Basketball_red', 'Sports Equipment', 30, 19.99, 'Spalding', 29.99);
+go
+
 
 --2
 CREATE TRIGGER ArchiveEmployee
 ON Employees
-AFTER DELETE
+INSTEAD OF DELETE
 AS
 BEGIN
+    SET IDENTITY_INSERT ArchivedEmployees ON;
+
     INSERT INTO ArchivedEmployees (EmployeeId, FullName, Position, HireDate, Salary, TerminationDate)
     SELECT EmployeeId, FullName, Position, HireDate, Salary, GETDATE() AS TerminationDate
     FROM deleted;
+
+    SET IDENTITY_INSERT ArchivedEmployees OFF;
+
+    DELETE FROM Employees
+    WHERE EmployeeId IN (SELECT EmployeeId FROM deleted);
 END;
 
-
+-- перевірка (працює)
+DELETE FROM Employees 
+WHERE FullName = 'Bob Miler' AND Position = 'Manager' AND HireDate = '2023-01-01' AND Salary = 6000;
 
 --3
 CREATE TRIGGER PreventNewSeller
@@ -59,7 +71,7 @@ BEGIN
     END
 END;
 
---перевірка
+--перевірка (працює)
 INSERT INTO Employees (FullName, Position, HireDate, Salary)
 VALUES
     ('Bob Miler', 'Manager', '2023-01-01', 6000);
@@ -83,24 +95,40 @@ BEGIN
         FROM inserted;
     END
 END;
---такой таблици нет(структура єтого магазина отстой я 5 лет работал в 1с поддержки худших вопросов невидел)
+
+--перевірка (працює)
 INSERT INTO Customers (FullName, Email, Phone, Gender, OrderHistory, DiscountPercent, SubscribedToNewsletter)
 VALUES
     ('John Doe', 'john@example.com', '1234567890', 'Male', NULL, 0.00, 1);
 
 
 --5
-CREATE TRIGGER MoveOrderHistoryOnDelete
+CREATE TRIGGER CustomerDelete
 ON Customers
 AFTER DELETE
 AS
 BEGIN
-    INSERT INTO PurchaseHistory (CustomerId, PurchaseDate, PurchaseDetails)
-    SELECT d.CustomerId, GETDATE(), d.OrderHistory
-    FROM deleted d;
+    INSERT INTO PurchaseHistory (ProductId, SalePrice, Quantity, PurchaseDate, CustomerId, EmployeeId)
+    SELECT ProductId, SalePrice, Quantity, SaleDate, deleted.CustomerId, EmployeeId
+    FROM deleted
+    JOIN Sales ON deleted.CustomerId = Sales.CustomerId;
 END;
 
---6
+
+--перевірка (не працює???) Щоб видалити запис з таблиці "Покупці",
+--спершу потрібно видалити всі записи, які посилаються на цього покупця
+
+DELETE FROM Customers
+WHERE FullName = 'John Doe'
+AND Email = 'john@example.com'
+AND Phone = '1234567890'
+AND Gender = 'Male'
+AND OrderHistory IS NULL
+AND DiscountPercent = 0.00
+AND SubscribedToNewsletter = 1;
+
+
+--6 
 CREATE TRIGGER PreventAddingExistingSeller
 ON Employees
 INSTEAD OF INSERT
@@ -108,9 +136,8 @@ AS
 BEGIN
     IF EXISTS (
         SELECT 1
-        FROM inserted i
-        JOIN Customers c ON i.FullName = c.FullName
-        WHERE i.Position = 'Salesperson'
+        FROM inserted
+        JOIN Customers ON inserted.FullName = Customers.FullName
     )
     BEGIN
         RAISERROR('Запис існує. Додавання нового продавця скасовується.', 16, 1);
@@ -124,6 +151,7 @@ BEGIN
     END;
 END;
 
+--перевірка (працює)
 INSERT INTO Employees (FullName, Position, HireDate, Salary)
 VALUES
 ('Amanda Martinez', 'Manager', '2020-01-01', 5000);
@@ -139,10 +167,9 @@ BEGIN
         SELECT 1
         FROM inserted i
         JOIN Employees e ON i.FullName = e.FullName
-        WHERE e.Position = 'Salesperson'
     )
     BEGIN
-        RAISERROR('Cannot add new customer. This person already exists in the Employees table as a salesperson.', 16, 1);
+        RAISERROR('Неможливо добавити покупця. Він вже продавець.', 16, 1);
     END
     ELSE
     BEGIN
@@ -151,10 +178,12 @@ BEGIN
         FROM inserted;
     END;
 END;
---перевірка
+
+
+--перевірка (працює)
 INSERT INTO Customers (FullName, Email, Phone, Gender, OrderHistory, DiscountPercent, SubscribedToNewsletter)
 VALUES
-    ('John Doe', 'john@example.com', '1234567890', 'Male', NULL, 0.00, 1);
+    ('Daniel Jones', 'john@example.com', '1234567890', 'Male', NULL, 0.00, 1);
 
 
 --8
@@ -180,7 +209,7 @@ BEGIN
         FROM inserted;
     END
 END;
---приклад заборони
+--приклад заборони (працює)
 INSERT INTO Sales (ProductId, SalePrice, Quantity, SaleDate, CustomerId, EmployeeId)
 VALUES
     (23,  99.99, 10, '2024-03-31', 4,3);
@@ -188,21 +217,81 @@ VALUES
 
 
 	--При продажу товару заносити інформацію про продаж у таблицю «Історія».
-CREATE TRIGGER History
-ON Sales
-AFTER INSERT
+--CREATE TRIGGER History
+--ON Sales
+--AFTER INSERT
+--AS
+--BEGIN
+--    INSERT INTO PurchaseHistory (ProductId, SalePrice, Quantity, PurchaseDate, CustomerId, EmployeeId)
+--    SELECT 
+--        ProductId,
+--        SalePrice,
+--        Quantity,
+--        SaleDate,
+--        CustomerId,
+--        EmployeeId
+--    FROM inserted;
+--END;
+
+--Домашнє завдання № 3
+
+--1 
+CREATE PROCEDURE GetAllProducts
 AS
 BEGIN
-    INSERT INTO PurchaseHistory (ProductId, SalePrice, Quantity, PurchaseDate, CustomerId, EmployeeId)
-    SELECT 
-        ProductId,
-        SalePrice,
-        Quantity,
-        SaleDate,
-        CustomerId,
-        EmployeeId
-    FROM inserted;
+    SELECT *
+    FROM Products;
 END;
+
+--перевірка 
+exec GetAllProducts;
+
+--2
+CREATE PROCEDURE Category
+    @Category NVARCHAR(50)
+AS
+BEGIN
+    SELECT *
+    FROM Products
+    WHERE Category = @Category;
+END;
+
+--перевірка
+exec Category 'Sports Equipment';
+
+-- 3 by Phone
+CREATE PROCEDURE GetTop3OldestCustomers
+AS
+BEGIN
+    SELECT TOP 3 *
+    FROM Customers
+    ORDER BY Phone ASC; --в базі немає колонки RegistrationDate
+END;
+
+EXEC GetTop3OldestCustomers;
+-- select * from Customers
+
+
+-- 4
+CREATE PROCEDURE TopSalesperson
+AS
+BEGIN
+    SELECT TOP 1
+        Employees.FullName AS SalespersonName,
+        SUM(Sales.SalePrice) AS TotalSales
+    FROM Sales
+    INNER JOIN Employees ON Employees.EmployeeId = Employees.EmployeeId
+    GROUP BY Employees.FullName
+    ORDER BY TotalSales DESC;
+END;
+
+--перевірка
+exec TopSalesperson
+
+-- 5
+
+
+
 
 
 
