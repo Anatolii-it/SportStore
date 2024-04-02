@@ -97,9 +97,9 @@ BEGIN
 END;
 
 --перевірка (працює)
-INSERT INTO Customers (FullName, Email, Phone, Gender, OrderHistory, DiscountPercent, SubscribedToNewsletter)
+INSERT INTO Customers (FullName, Email, Phone, Gender, RegistrationDate, DiscountPercent, SubscribedToNewsletter)
 VALUES
-    ('John Doe', 'john@example.com', '1234567890', 'Male', NULL, 0.00, 1);
+    ('John Doe', 'john@example.com', '1234567890', 'Male', '2020-02-05', 0.00, 1);
 
 
 --5
@@ -116,14 +116,14 @@ END;
 
 
 --перевірка (не працює???) Щоб видалити запис з таблиці "Покупці",
---спершу потрібно видалити всі записи, які посилаються на цього покупця
+--спершу потрібно видалити всі записи, які посилаються на цього покупця ???
 
 DELETE FROM Customers
 WHERE FullName = 'John Doe'
 AND Email = 'john@example.com'
 AND Phone = '1234567890'
 AND Gender = 'Male'
-AND OrderHistory IS NULL
+AND RegistrationDate = '2020-02-05'
 AND DiscountPercent = 0.00
 AND SubscribedToNewsletter = 1;
 
@@ -173,17 +173,17 @@ BEGIN
     END
     ELSE
     BEGIN
-        INSERT INTO Customers (FullName, Email, Phone, Gender, OrderHistory, DiscountPercent, SubscribedToNewsletter)
-        SELECT FullName, Email, Phone, Gender, OrderHistory, DiscountPercent, SubscribedToNewsletter
+        INSERT INTO Customers (FullName, Email, Phone, Gender, RegistrationDate, DiscountPercent, SubscribedToNewsletter)
+        SELECT FullName, Email, Phone, Gender, RegistrationDate, DiscountPercent, SubscribedToNewsletter
         FROM inserted;
     END;
 END;
 
 
 --перевірка (працює)
-INSERT INTO Customers (FullName, Email, Phone, Gender, OrderHistory, DiscountPercent, SubscribedToNewsletter)
+INSERT INTO Customers (FullName, Email, Phone, Gender, RegistrationDate, DiscountPercent, SubscribedToNewsletter)
 VALUES
-    ('Daniel Jones', 'john@example.com', '1234567890', 'Male', NULL, 0.00, 1);
+    ('Daniel Jones', 'john@example.com', '1234567890', 'Male', '2020-02-05', 0.00, 1);
 
 
 --8
@@ -212,7 +212,7 @@ END;
 --приклад заборони (працює)
 INSERT INTO Sales (ProductId, SalePrice, Quantity, SaleDate, CustomerId, EmployeeId)
 VALUES
-    (23,  99.99, 10, '2024-03-31', 4,3);
+    (22,  99.99, 10, '2024-03-31', 4,3);
 
 
 
@@ -265,11 +265,11 @@ AS
 BEGIN
     SELECT TOP 3 *
     FROM Customers
-    ORDER BY Phone ASC; --в базі немає колонки RegistrationDate
+    ORDER BY RegistrationDate ASC; 
 END;
 
 EXEC GetTop3OldestCustomers;
--- select * from Customers
+
 
 
 -- 4
@@ -340,4 +340,8 @@ BEGIN
     SET @DeletedCount = @@ROWCOUNT;
     SELECT @DeletedCount AS DeletedCount;
 END;
+
+-- перевірка
+exec DeleteCustomersRegisteredAfterDate '2023-01-01';
+
 
