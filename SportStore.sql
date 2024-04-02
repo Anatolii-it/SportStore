@@ -1,6 +1,6 @@
 INSERT INTO Employees (FullName, Position, HireDate, Salary)
 VALUES
-    ('John Smith', 'Manager', '2020-01-01', 5000),
+    ('John Doe', 'Manager', '2020-01-01', 5000),
     ('Emily Johnson', 'Sales Representative', '2021-03-15', 4000),
     ('Michael Williams', 'Sales Representative', '2021-05-20', 4000),
     ('Jessica Brown', 'Cashier', '2021-06-10', 3500),
@@ -29,7 +29,8 @@ VALUES
     ('Baseball Bat', 'Sports Equipment', 25, 50.99, 'Louisville Slugger', 49.99),
     ('Punching Bag', 'Boxing Equipment', 10, 130.99, 'Everlast', 129.99),
     ('Volleyball', 'Sports Equipment', 20, 30.99, 'Mikasa', 27.99),
-    ('Weight Bench', 'Fitness Equipment', 15, 240.99, 'Marcy', 229.99);
+    ('Weight Bench', 'Fitness Equipment', 15, 240.99, 'Marcy', 229.99),
+    ('Яблука', 'Footwear', 50, 99.99, 'Nike', 79.99);
 
 	INSERT INTO Customers (FullName, Email, Phone, Gender, RegistrationDate, DiscountPercent, SubscribedToNewsletter)
 VALUES
